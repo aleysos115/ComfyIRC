@@ -19,7 +19,7 @@ def quit():
 root = Tk()
 root.wm_title("ComfyIRC")
 root.minsize(width=800, height=600)
-root.wm_iconbitmap("icon.ico")
+root.wm_iconbitmap("resources/icon.ico")
 
 menubar = Menu(root)
 settingsMenu = Menu(menubar, tearoff=0)
