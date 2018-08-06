@@ -56,5 +56,10 @@ class IRCClient:
             message = ":" + message
         self.sendCommand(cmd, message)
 
-    
+    #Prints all responses from server, Should be called in thread
+    def printResponse(self):
+        resp = self.getResponse()
+        if resp:
+            msg = resp.strip().split(":")
+            print("\n< {}> {}".format(msg[1].split("!")[0], msg[2].strip()))
         
