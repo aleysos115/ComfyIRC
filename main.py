@@ -1,6 +1,7 @@
 # Copyright Brave Ziazan 2018
 
 from tkinter import *
+from tkinter import simpledialog
 import sys
 from ircClient import *
 
