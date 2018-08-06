@@ -2,6 +2,9 @@
 
 from tkinter import *
 import sys
+from ircClient import *
+
+client = IRCClient("username", "server", "port")
 
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 

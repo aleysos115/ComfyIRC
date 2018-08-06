@@ -2,7 +2,7 @@ import socket
 import sys
 import threading
 
-class ircClient:
+class IRCClient:
 
     #init from UI
     def __init__(self, username, server, port):
