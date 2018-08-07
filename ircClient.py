@@ -19,7 +19,10 @@ class IRCClient:
 
     # Returns server response
     def getResponse(self):
+        #try:
         return self.conn.recv(512)
+        #except ConnectionAbortedError:
+        
     
     # Generic send command function 
     #TODO: Make this accept arbitrary message length and prefix
@@ -71,7 +74,7 @@ class IRCClient:
         while True:
             self.printResponse()
     
-def TchannelRequest(client, username, channel):
+def ServerRequest(client):
     cmd = ""
     joined = False
     while(joined == False):
@@ -79,16 +82,20 @@ def TchannelRequest(client, username, channel):
         msg = resp.decode(encoding='UTF-8')
         print(msg.strip())
         
+        '''
         if "376" in resp:
             client.joinChannel(channel)
-        
-        if "PING" in resp:
+        '''
+
+        if "PING" in msg:
+            print("Test")
             client.sendCommand("PONG", ":" + msg.split(":")[1])
 
-        if "366" in resp:
+        if "366" in msg:
             joined = True
             t = threading.Thread(target=client.printResponse)
             t.start()
+    '''
     try:
         while(cmd != "/quit"):
             #Get input here
@@ -102,3 +109,4 @@ def TchannelRequest(client, username, channel):
         quit()
         t = threading.Thread(target=client.printResponse)
         t.start()
+    '''

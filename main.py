@@ -13,8 +13,14 @@ def connect():
     global client
     client = IRCClient(username.get(), serverName.get(), port.get())
     client.connect()
+    client.sendCommand("PASS", "none")
+    client.sendNick(client.username)
+    client.sendCommand("USER", "test 0 * :test")
+    ServerRequest(client)
+    '''
     t = threading.Thread(target=client.TprintResponse)
     t.start()
+    '''
 
 # Called when Disconnect button is pressed, disconnects user from the current server
 def disconnect():
