@@ -10,7 +10,7 @@ class IRCClient:
     def __init__(self, username, server, port):
         self.username = username
         self.server = server
-        self.port = port
+        self.port = int(port)
 
     # Connects to server specified by the request
     def connect(self):
@@ -24,7 +24,7 @@ class IRCClient:
     # Generic send command function 
     #TODO: Make this accept arbitrary message length and prefix
     def sendCommand(self, cmd, message):
-        command = "{} {}\r\n".format(cmd, message)
+        command = ("{} {}\r\n".format(cmd, message)).encode(encoding='UTF-8')
         self.conn.send(command)
 
     # Request join message - JOIN <channels> [<keys>]
@@ -61,7 +61,44 @@ class IRCClient:
     # Prints all responses from server, Should be called in thread
     def printResponse(self):
         resp = self.getResponse()
+        msg = resp.decode(encoding='UTF-8')
+        #print(msg)
         if resp:
-            msg = resp.strip().split(":")
+            msg = msg.strip().split(":")
             print("\n< {}> {}".format(msg[1].split("!")[0], msg[2].strip()))
         
+    def TprintResponse(self):
+        while True:
+            self.printResponse()
+    
+def TchannelRequest(client, username, channel):
+    cmd = ""
+    joined = False
+    while(joined == False):
+        resp = client.getResponse()
+        msg = resp.decode(encoding='UTF-8')
+        print(msg.strip())
+        
+        if "376" in resp:
+            client.joinChannel(channel)
+        
+        if "PING" in resp:
+            client.sendCommand("PONG", ":" + msg.split(":")[1])
+
+        if "366" in resp:
+            joined = True
+            t = threading.Thread(target=client.printResponse)
+            t.start()
+    try:
+        while(cmd != "/quit"):
+            #Get input here
+            if cmd == "/quit":
+                client.sendQuit()
+                quit()
+            if cmd and len(cmd) > 0:
+                client.sendPrivateMessage(channel, cmd)
+    except KeyboardInterrupt:
+        client.sendQuit()
+        quit()
+        t = threading.Thread(target=client.printResponse)
+        t.start()

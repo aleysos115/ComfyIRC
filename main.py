@@ -4,16 +4,22 @@ import sys
 import json
 from tkinter import *
 from ircClient import *
+import threading
 
-client = IRCClient("username", "server", "port")
-
+client = None
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
     print("connect")
+    global client
+    client = IRCClient(username.get(), serverName.get(), port.get())
+    client.connect()
+    t = threading.Thread(target=client.TprintResponse)
+    t.start()
 
 # Called when Disconnect button is pressed, disconnects user from the current server
 def disconnect():
     print("disconnect")
+    client.sendQuit("")
 
 # Called when File --> Quit is pressed, exits the application
 def quit():
