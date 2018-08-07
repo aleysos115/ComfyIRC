@@ -69,7 +69,11 @@ class IRCClient:
         if resp:
             msg = msg.strip().split(":")
             print("\n< {}> {}".format(msg[1].split("!")[0], msg[2].strip()))
-        
+    
+    def returnResponse(self):
+        resp = self.getResponse()
+        return resp.decode(encoding='UTF-8')
+
     def TprintResponse(self):
         while True:
             self.printResponse()
@@ -88,6 +92,7 @@ def ServerRequest(client):
         '''
 
         if "PING" in msg:
+            joined = True
             print("Test")
             client.sendCommand("PONG", ":" + msg.split(":")[1])
 
