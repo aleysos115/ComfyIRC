@@ -39,7 +39,10 @@ usernamePref3.set("")
 # Top dropdown menus
 menubar = Menu(root)
 settingsMenu = Menu(menubar, tearoff=0)
-settingsMenu.add_command(label="Theme")
+themeMenu = Menu(settingsMenu, tearoff=0)
+themeMenu.add_command(label="Dark (Default)")
+themeMenu.add_command(label="Light")
+settingsMenu.add_cascade(label="Theme", menu=themeMenu)
 fileMenu = Menu(menubar, tearoff=0)
 fileMenu.add_command(label="Quit", command=quit)
 menubar.add_cascade(label="File", menu=fileMenu)
@@ -95,4 +98,11 @@ usernameEntry.pack(side=LEFT)
 
 root.config(menu=menubar)
 
+def applyTheme():
+    display.configure(background="#161616", foreground="#ffffff")
+    messageEntry.configure(background="#161616", foreground="#ffffff")
+
+applyTheme()
+
 root.mainloop()
+
