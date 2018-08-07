@@ -6,6 +6,7 @@ from tkinter import *
 from ircClient import *
 import threading
 import tkinter.scrolledtext as st
+import time
 
 client = None
 
@@ -21,6 +22,15 @@ def TpopulateDisplay():
         #I don't know if this works
         display.see(END)
 
+def populateChannels():
+    client.sendCommand("LIST", None)
+    response = ""
+    while "323" not in response:
+        try:
+            response = client.returnResponse()
+        except ConnectionAbortedError:
+            raise ConnectionAbortedError
+        channelList.insert(END, response)
 
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
@@ -34,6 +44,11 @@ def connect():
     ServerRequest(client)
     t = threading.Thread(target=TpopulateDisplay)
     t.start()
+    '''
+    time.sleep(2)
+    client.sendCommand("LIST", None)
+    '''
+    #populateChannels()
     '''
     t = threading.Thread(target=client.TprintResponse)
     t.start()
@@ -55,6 +70,11 @@ def leave():
 # Sends the message entered into the message entry, and clears the message entry
 def send():
     print("send")
+    msg = message.get()
+    if(msg == "/help"):
+        client.sendCommand("HELP", None)
+    if(msg != None):
+        client.sendCommand(msg, None)
     message.set("")
 
 # This is called when Return key is pressed and the message entry has focus, exists because the callback for a button press doesn't require an event arg, but a keybind does
