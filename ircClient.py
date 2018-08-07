@@ -19,9 +19,10 @@ class IRCClient:
 
     # Returns server response
     def getResponse(self):
-        #try:
-        return self.conn.recv(512)
-        #except ConnectionAbortedError:
+        try:
+            return self.conn.recv(512)
+        except ConnectionAbortedError:
+            raise ConnectionAbortedError
         
     
     # Generic send command function 
@@ -60,6 +61,7 @@ class IRCClient:
         if message != None:
             message = ":" + message
         self.sendCommand(cmd, message)
+        self.conn.close()
 
     # Prints all responses from server, Should be called in thread
     def printResponse(self):
@@ -71,7 +73,10 @@ class IRCClient:
             print("\n< {}> {}".format(msg[1].split("!")[0], msg[2].strip()))
     
     def returnResponse(self):
-        resp = self.getResponse()
+        try:
+            resp = self.getResponse()
+        except ConnectionAbortedError:
+            raise ConnectionAbortedError
         return resp.decode(encoding='UTF-8')
 
     def TprintResponse(self):

@@ -10,7 +10,11 @@ client = None
 
 def TpopulateDisplay():
     while True:
-        display.insert(END, client.returnResponse())
+        try:
+            response = client.returnResponse()
+        except ConnectionAbortedError:
+            break
+        display.insert(END, response)
 
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
@@ -32,7 +36,7 @@ def connect():
 # Called when Disconnect button is pressed, disconnects user from the current server
 def disconnect():
     print("disconnect")
-    client.sendQuit("")
+    client.sendQuit(None)
 
 # Called when Join button is pressed, has user join the selected channel
 def join():
