@@ -82,6 +82,7 @@ fileMenu.add_command(label="Quit", command=quit)
 menubar.add_cascade(label="File", menu=fileMenu)
 menubar.add_cascade(label="Settings", menu=settingsMenu)
 
+# Top frame
 topFrame = Frame(height=0, bd=1)
 topFrame.pack(fill=X, padx=0, pady=0)
 #topFrame.configure(background="black")
@@ -92,7 +93,15 @@ disconnectButton.pack(side=LEFT)
 joinButton = Button(topFrame, text="Join", command=join)
 joinButton.pack(side=LEFT)
 leaveButton = Button(topFrame, text="Leave", command=leave)
-leaveButton.pack(side=LEFT)
+leaveButton.pack(side=LEFT, expand=False)
+
+serverSelectorFrame = Frame(topFrame, height=0, bd=1)
+serverSelectorFrame.pack(side=LEFT, fill=X, expand=True)
+var = StringVar()
+serverSelector = OptionMenu(serverSelectorFrame, var, "one", "two", "three")
+serverSelector.pack(side=LEFT, fill=X, expand=True)
+addServerButton = Button(serverSelectorFrame, text="+")
+addServerButton.pack(side=LEFT)
 
 # Containing frame for main displays
 mainFrame = Frame(height=0, bd=1)
@@ -166,16 +175,19 @@ def applyTheme():
 
     def applyToButton(buttons):
         for button in buttons:
-            button.configure(background=data["buttonBackground"], foreground=data["buttonText"], relief=FLAT)
+            button.configure(background=data["buttonBackground"], foreground=data["buttonText"], relief=FLAT, activebackground="#333333", activeforeground="white", padx=5)
     
     display.configure(background=data["chatBackground"], foreground=data["chatText"])
     root.configure(background=data["rootBackground"])
+    serverSelectorFrame.configure(padx=10, pady=5)
+    serverSelector.configure(background="#161616", foreground="#ffffff", borderwidth=0, relief=FLAT, padx=10, highlightthickness=0)
+
     applyToEntry((messageEntry, serverEntry, portEntry, usernameEntry))
     applyToListbox((channelList, userList))
     #applyToMenu((menubar, themeMenu, fileMenu, settingsMenu))
-    applyToFrame((mainFrame, topFrame, chatFrame, messageFrame))
+    applyToFrame((mainFrame, topFrame, serverSelectorFrame, chatFrame, messageFrame))
     applyToLabel((messageLabel, usernameLabel, portLabel, serverLabel))
-    applyToButton((connectButton, disconnectButton, joinButton, leaveButton, sendButton))
+    applyToButton((connectButton, disconnectButton, joinButton, leaveButton, addServerButton, sendButton))
     
 applyTheme()
 
