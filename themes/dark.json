@@ -3,12 +3,14 @@
     "chatBackground":"#161616",
     "listboxText":"#ffffff",
     "listboxBackground":"#161616",
-    "buttonText":"#ffffff",
+    "buttonText":"black",
     "buttonBackground":"#666666",
-    "rootBackground":"#333333",
+    "rootBackground":"black",
     "textEntryText":"#ffffff",
     "textEntryBackground":"#161616",
     "menuText":"#ffffff",
     "menuBackground":"#666666",
-    "frameBackground":"#161616"
+    "frameBackground":"#333333",
+    "labelBackground":"#333333",
+    "labelForeground":"#ffffff"
 }
