@@ -5,6 +5,7 @@ import json
 from tkinter import *
 from ircClient import *
 import threading
+import tkinter.scrolledtext as st
 
 client = None
 
@@ -15,6 +16,11 @@ def TpopulateDisplay():
         except ConnectionAbortedError:
             break
         display.insert(END, response)
+        #display.insert(END, client.returnResponse())
+        # Set display scroll position to bottom when a new message is received 
+        #I don't know if this works
+        display.see(END)
+
 
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
@@ -132,7 +138,7 @@ userList.insert(END, "user")
 # Main chat display
 chatFrame = Frame(mainFrame)
 chatFrame.pack(side=TOP, expand=True, fill=BOTH)
-display = Text(chatFrame)
+display = st.ScrolledText(chatFrame)
 display.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
 
 # Chat message entry
@@ -146,6 +152,7 @@ sendButton = Button(messageFrame, text="Send", command=send)
 sendButton.pack(side=LEFT)
 messageEntry.bind("<Return>", _send)
 
+# Entries for server connection information
 serverLabel = Label(root, text="Server")
 serverLabel.pack(side=LEFT)
 serverEntry = Entry(root, textvariable=serverName)
