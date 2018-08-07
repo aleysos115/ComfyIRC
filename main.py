@@ -7,6 +7,11 @@ from ircClient import *
 import threading
 
 client = None
+
+def TpopulateDisplay():
+    while True:
+        display.insert(END, client.returnResponse())
+
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
     print("connect")
@@ -17,6 +22,8 @@ def connect():
     client.sendNick(client.username)
     client.sendCommand("USER", "test 0 * :test")
     ServerRequest(client)
+    t = threading.Thread(target=TpopulateDisplay)
+    t.start()
     '''
     t = threading.Thread(target=client.TprintResponse)
     t.start()
