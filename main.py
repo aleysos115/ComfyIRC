@@ -21,6 +21,23 @@ def disconnect():
     print("disconnect")
     client.sendQuit("")
 
+# Called when Join button is pressed, has user join the selected channel
+def join():
+    print("join")
+
+# Called when Leave button is pressed, has user leave the selected channel
+def leave():
+    print("leave")
+
+# Sends the message entered into the message entry, and clears the message entry
+def send():
+    print("send")
+    message.set("")
+
+# This is called when Return key is pressed and the message entry has focus, exists because the callback for a button press doesn't require an event arg, but a keybind does
+def _send(event):
+    send()
+
 # Called when File --> Quit is pressed, exits the application
 def quit():
     print("Quiting...")
@@ -44,6 +61,9 @@ usernamePref2.set("")
 usernamePref3 = StringVar()
 usernamePref3.set("")
 
+message = StringVar()
+message.set("")
+
 # Top dropdown menus
 menubar = Menu(root)
 settingsMenu = Menu(menubar, tearoff=0)
@@ -63,6 +83,10 @@ connectButton = Button(topFrame, text="Connect", command=connect)
 connectButton.pack(side=LEFT)
 disconnectButton = Button(topFrame, text="Disconnect", command=disconnect)
 disconnectButton.pack(side=LEFT)
+joinButton = Button(topFrame, text="Join", command=join)
+joinButton.pack(side=LEFT)
+leaveButton = Button(topFrame, text="Leave", command=leave)
+leaveButton.pack(side=LEFT)
 
 # Containing frame for main displays
 mainFrame = Frame(height=0, bd=1)
@@ -90,8 +114,11 @@ messageFrame = Frame(chatFrame, height=0, bd=0)
 messageFrame.pack(side=TOP, fill=X)
 messageLabel = Label(messageFrame, text="Username")
 messageLabel.pack(side=LEFT)
-messageEntry = Entry(messageFrame)
+messageEntry = Entry(messageFrame, textvariable=message)
 messageEntry.pack(side=LEFT, expand=True, fill=X, pady=10)
+sendButton = Button(messageFrame, text="Send", command=send)
+sendButton.pack(side=LEFT)
+messageEntry.bind("<Return>", _send)
 
 serverLabel = Label(root, text="Server")
 serverLabel.pack(side=LEFT)
@@ -142,9 +169,18 @@ def applyTheme():
     #applyToMenu((menubar, themeMenu, fileMenu, settingsMenu))
     applyToFrame((mainFrame, topFrame, chatFrame, messageFrame))
     applyToLabel((messageLabel, usernameLabel, portLabel, serverLabel))
-    applyToButton((connectButton, disconnectButton))
+    applyToButton((connectButton, disconnectButton, joinButton, leaveButton, sendButton))
     
 applyTheme()
+
+# Preferences window
+prefWindow = Toplevel()
+prefWindow.title("Preferences")
+prefWindowWidth = 600
+prefWindowHeight = 450
+prefWindow.minsize(width=prefWindowWidth, height=prefWindowHeight)
+prefWindow.maxsize(width=prefWindowWidth, height=prefWindowHeight)
+prefWindow.withdraw()
 
 root.mainloop()
 
