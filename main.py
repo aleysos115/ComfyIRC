@@ -1,6 +1,7 @@
 # Copyright Brave Ziazan, Alex Sosin 2018
 
 import sys
+import json
 from tkinter import *
 from ircClient import *
 
@@ -99,8 +100,26 @@ usernameEntry.pack(side=LEFT)
 root.config(menu=menubar)
 
 def applyTheme():
-    display.configure(background="#161616", foreground="#ffffff")
-    messageEntry.configure(background="#161616", foreground="#ffffff")
+    with open("themes/dark.json", "r") as json_file:
+        data = json.load(json_file)
+
+    def applyToEntry(entries):
+        for entry in entries:
+            entry.configure(background=data["textEntryBackground"], foreground=data["textEntryText"])
+
+    def applyToListbox(lists):
+        for l in lists:
+            l.configure(background=data["listboxBackground"], foreground=data["listboxText"])
+
+    def applyToMenu(menus):
+        for menu in menus:
+            menu.configure(background=data["menuBackground"], foreground=data["menuText"])
+    
+    display.configure(background=data["chatBackground"], foreground=data["chatText"])
+    applyToEntry((messageEntry, serverEntry, portEntry, usernameEntry))
+    applyToListbox((channelList, userList))
+    applyToMenu((menubar, themeMenu, fileMenu))
+    
 
 applyTheme()
 
