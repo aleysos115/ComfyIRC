@@ -10,27 +10,55 @@ import time
 
 client = None
 
-def TpopulateDisplay():
-    while True:
-        try:
-            response = client.returnResponse()
-        except ConnectionAbortedError:
-            break
-        display.insert(END, response)
+def populateDisplay():
+    try:
+        response = client.returnResponse()
+    except ConnectionAbortedError:
+        raise
+    if "PING" in response:
+        client.sendPong(response)
+
+    display.insert(END, response)
         #display.insert(END, client.returnResponse())
         # Set display scroll position to bottom when a new message is received 
         #I don't know if this works
-        display.see(END)
+    display.see(END)
+    return response
+
+def TpopulateDisplay():
+    while True:
+        try:
+            populateDisplay()
+        except ConnectionAbortedError:
+            break
 
 def populateChannels():
     client.sendCommand("LIST", None)
     response = ""
-    while "323" not in response:
+    while True:
         try:
-            response = client.returnResponse()
+            resp = client.returnResponse()
+            if "322" in resp:
+                response = response + resp
         except ConnectionAbortedError:
             raise ConnectionAbortedError
-        channelList.insert(END, response)
+        '''
+        if "322" in response:
+            hashIndex = response.find('#')
+            colonIndex = response.find(':', hashIndex)
+            channelList.insert(END, response[hashIndex:colonIndex])
+        '''
+        if "323" in response:
+            break 
+    Lresp = response.splitlines()
+    for line in Lresp:
+        if "322" in line:
+            hashIndex = line.find('#')
+            colonIndex = line.find(':', hashIndex)
+            channelList.insert(END, line[hashIndex:colonIndex])
+    #print(response)
+
+            
 
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
@@ -42,6 +70,12 @@ def connect():
     client.sendNick(client.username)
     client.sendCommand("USER", "test 0 * :test")
     ServerRequest(client)
+
+    resp = ""
+    while("376" not in resp):
+        resp = populateDisplay()
+    populateChannels()
+
     t = threading.Thread(target=TpopulateDisplay)
     t.start()
     '''
@@ -71,10 +105,15 @@ def leave():
 def send():
     print("send")
     msg = message.get()
-    if(msg == "/help"):
-        client.sendCommand("HELP", None)
-    if(msg != None):
-        client.sendCommand(msg, None)
+    if msg[0] == '/':
+        print("Send")
+        client.sendCommand("LIST", None)
+        #Handle command
+    elif client.channel != None:
+        client.sendPrivateMessage(client.channel, msg)
+    else:
+        display.insert(END, "Please join a channel before sending a message through /JOIN <channelName>")
+
     message.set("")
 
 # This is called when Return key is pressed and the message entry has focus, exists because the callback for a button press doesn't require an event arg, but a keybind does

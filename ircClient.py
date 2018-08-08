@@ -4,6 +4,8 @@ import socket
 import sys
 import threading
 
+encodeType = "UTF-8"
+
 class IRCClient:
 
     # Init from UI
@@ -11,6 +13,7 @@ class IRCClient:
         self.username = username
         self.server = server
         self.port = int(port)
+        self.channel = None
 
     # Connects to server specified by the request
     def connect(self):
@@ -28,7 +31,10 @@ class IRCClient:
     # Generic send command function 
     #TODO: Make this accept arbitrary message length and prefix
     def sendCommand(self, cmd, message):
-        command = ("{} {}\r\n".format(cmd, message)).encode(encoding='UTF-8')
+        if message != None:
+            command = ("{} {}\r\n".format(cmd, message)).encode(encoding=encodeType)
+        else:
+            command = ("{}\r\n".format(cmd)).encode(encoding=encodeType)
         self.conn.send(command)
 
     # Request join message - JOIN <channels> [<keys>]
@@ -48,6 +54,7 @@ class IRCClient:
         cmd = "PART {}".format(channel)
         if message != None:
             message = ":" + message
+        self.channel = None
         self.sendCommand(cmd, message)
     
     # Sends NICK message - NICK <nickname>
@@ -66,7 +73,7 @@ class IRCClient:
     # Prints all responses from server, Should be called in thread
     def printResponse(self):
         resp = self.getResponse()
-        msg = resp.decode(encoding='UTF-8')
+        msg = resp.decode(encoding=encodeType)
         #print(msg)
         if resp:
             msg = msg.strip().split(":")
@@ -77,18 +84,27 @@ class IRCClient:
             resp = self.getResponse()
         except ConnectionAbortedError:
             raise ConnectionAbortedError
-        return resp.decode(encoding='UTF-8')
+        
+        response = resp.decode(encoding=encodeType)
+        char_list = [response[j] for j in range(len(response)) if ord(response[j]) in range(65536)]
+        response = ''
+        for j in char_list:
+            response = response + j
+        return response
 
     def TprintResponse(self):
         while True:
             self.printResponse()
     
+    def sendPong(self, msg):
+        self.sendCommand("PONG", ":" + msg.split(":")[1])
+
 def ServerRequest(client):
     cmd = ""
     joined = False
     while(joined == False):
         resp = client.getResponse()
-        msg = resp.decode(encoding='UTF-8')
+        msg = resp.decode(encoding=encodeType)
         print(msg.strip())
         
         '''
