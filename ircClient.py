@@ -35,6 +35,7 @@ class IRCClient:
             command = ("{} {}\r\n".format(cmd, message)).encode(encoding=encodeType)
         else:
             command = ("{}\r\n".format(cmd)).encode(encoding=encodeType)
+        print(command)
         self.conn.send(command)
 
     # Request join message - JOIN <channels> [<keys>]
@@ -79,6 +80,7 @@ class IRCClient:
             msg = msg.strip().split(":")
             print("\n< {}> {}".format(msg[1].split("!")[0], msg[2].strip()))
     
+    #returns stripped and cleaned version of server response as string
     def returnResponse(self):
         try:
             resp = self.getResponse()
@@ -91,48 +93,18 @@ class IRCClient:
         for j in char_list:
             response = response + j
         return response
-
-    def TprintResponse(self):
-        while True:
-            self.printResponse()
     
+    #sends pong message back to server
     def sendPong(self, msg):
         self.sendCommand("PONG", ":" + msg.split(":")[1])
 
+#Initial ping/pong handling 
 def ServerRequest(client):
-    cmd = ""
     joined = False
     while(joined == False):
-        resp = client.getResponse()
-        msg = resp.decode(encoding=encodeType)
-        print(msg.strip())
-        
-        '''
-        if "376" in resp:
-            client.joinChannel(channel)
-        '''
+        resp = client.returnResponse()
+        print(resp.strip())
 
-        if "PING" in msg:
+        if "PING" in resp:
             joined = True
-            print("Test")
-            client.sendCommand("PONG", ":" + msg.split(":")[1])
-
-        if "366" in msg:
-            joined = True
-            t = threading.Thread(target=client.printResponse)
-            t.start()
-    '''
-    try:
-        while(cmd != "/quit"):
-            #Get input here
-            if cmd == "/quit":
-                client.sendQuit()
-                quit()
-            if cmd and len(cmd) > 0:
-                client.sendPrivateMessage(channel, cmd)
-    except KeyboardInterrupt:
-        client.sendQuit()
-        quit()
-        t = threading.Thread(target=client.printResponse)
-        t.start()
-    '''
+            client.sendPong(resp)

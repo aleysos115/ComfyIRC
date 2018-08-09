@@ -10,55 +10,63 @@ import time
 
 client = None
 
-def populateDisplay():
-    try:
-        response = client.returnResponse()
-    except ConnectionAbortedError:
-        raise
-    if "PING" in response:
-        client.sendPong(response)
+#center thread loop for message recvieve 
+def TreturnResponse():
+    response322 = ""
+    while True:
+        try:
+            response = client.returnResponse()
+        except ConnectionAbortedError:
+            break
+        if "PING" in response:
+            client.sendPong(response)
+        if "322" in response:
+            response322 = response322 + response
+            if "323" in response322:
+                populateChannels(response322)
+                response322 = ""
+        elif "353" in response:
+            populateUsers(response)
+            print(response)
 
+        else:
+            populateDisplay(response)
+
+def TretrieveInfo():
+    while True:
+        client.sendCommand("LIST", None)
+        if(client.channel != None):
+            time.sleep(2)
+            client.sendCommand("NAMES", client.channel)
+        time.sleep(10)
+
+#populates center display
+def populateDisplay(response):
     display.insert(END, response)
-        #display.insert(END, client.returnResponse())
-        # Set display scroll position to bottom when a new message is received 
-        #I don't know if this works
     display.see(END)
     return response
 
-def TpopulateDisplay():
-    while True:
-        try:
-            populateDisplay()
-        except ConnectionAbortedError:
-            break
-
-def populateChannels():
-    client.sendCommand("LIST", None)
-    response = ""
-    while True:
-        try:
-            resp = client.returnResponse()
-            if "322" in resp:
-                response = response + resp
-        except ConnectionAbortedError:
-            raise ConnectionAbortedError
-        '''
-        if "322" in response:
-            hashIndex = response.find('#')
-            colonIndex = response.find(':', hashIndex)
-            channelList.insert(END, response[hashIndex:colonIndex])
-        '''
-        if "323" in response:
-            break 
+#populates Channel list
+def populateChannels(response):
+    channelList.delete(0, END)
+    channelList.insert(END, "CHANNELS")
     Lresp = response.splitlines()
     for line in Lresp:
         if "322" in line:
             hashIndex = line.find('#')
             colonIndex = line.find(':', hashIndex)
             channelList.insert(END, line[hashIndex:colonIndex])
-    #print(response)
 
-            
+def populateUsers(response):
+    response = response.splitlines()
+    response = response[0]
+    userList.delete(0, END)
+    userList.insert(END, "USERS")
+
+    users = response[response.find(":", 1) + 1:]
+    users = users.split(' ')
+    for user in users:
+        userList.insert(END, user)
 
 # Called when Connect button is pressed, connects the user to the selected server
 def connect(): 
@@ -71,22 +79,11 @@ def connect():
     client.sendCommand("USER", "test 0 * :test")
     ServerRequest(client)
 
-    resp = ""
-    while("376" not in resp):
-        resp = populateDisplay()
-    populateChannels()
-
-    t = threading.Thread(target=TpopulateDisplay)
+    t = threading.Thread(target=TreturnResponse)
     t.start()
-    '''
-    time.sleep(2)
-    client.sendCommand("LIST", None)
-    '''
-    #populateChannels()
-    '''
-    t = threading.Thread(target=client.TprintResponse)
-    t.start()
-    '''
+    
+    tInfoThread = threading.Thread(target=TretrieveInfo)
+    tInfoThread.start()
 
 # Called when Disconnect button is pressed, disconnects user from the current server
 def disconnect():
@@ -99,6 +96,7 @@ def join():
 
 # Called when Leave button is pressed, has user leave the selected channel
 def leave():
+    client.sendPart(client.channel, None)
     print("leave")
 
 # Sends the message entered into the message entry, and clears the message entry
@@ -107,9 +105,19 @@ def send():
     msg = message.get()
     if msg[0] == '/':
         print("Send")
-        client.sendCommand("LIST", None)
+        spaceIndex = msg.find(" ")
+        cmd = msg[1:spaceIndex]
+        if spaceIndex != -1:
+            param = msg[spaceIndex + 1:]
+        else:
+            param = None
+        if cmd == "JOIN":
+            client.joinChannel(param)
+        else:
+            client.sendCommand(cmd, param)
         #Handle command
     elif client.channel != None:
+        populateDisplay("<{}> {}\r\n".format(client.username, msg))
         client.sendPrivateMessage(client.channel, msg)
     else:
         display.insert(END, "Please join a channel before sending a message through /JOIN <channelName>")
